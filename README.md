@@ -18,7 +18,7 @@ any intermediate files, the rebuild the container.
 
 ### Special case
 
-`make push TAG=...` will push the image to DockerHub with a new tag;
+`make push OLDTAG=... NEWTAG=...` will push the image to DockerHub with a new tag;
 see _DOCKERHUB\_USERNAME_ below for more info.
 
 ### Customization
