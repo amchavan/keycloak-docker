@@ -64,14 +64,18 @@ start: $(LOCAL_SHARED_DIR) $(LOCAL_DATA_DIR)
 	docker run --detach \
 		-p $(PORT):8080 \
 		-v $(LOCAL_SHARED_DIR):$(CONTAINER_SHARED_DIR) \
-		--cidfile="$(CIDFILE)" \
 		-e DB_VENDOR=oracle \
 		-e DB_ADDR=ora12c2.hq.eso.org \
 		-e DB_PORT=1521 \
 		-e DB_USER=alma_amchavan \
 		-e DB_PASSWORD='alma_amchavan$$dba' \
 		-e DB_DATABASE=ALMA \
+		--cidfile="$(CIDFILE)" \
 		$(ALMAKC)
+
+#
+
+
 
 stop:
 	- docker stop `cat $(CIDFILE)` 2> /dev/null
@@ -92,7 +96,7 @@ push:
 	docker push $(DOCKERHUB_USERNAME)/$(ALMAKC):$(NEWTAG)
 
 # -------------------------------------------------------------------------
-# Experimental stuff follows
+# Initialize Keycloak database
 # -------------------------------------------------------------------------
 
 authenticate:
@@ -103,23 +107,24 @@ authenticate:
 		--password $(ADMIN_PASSWORD)
 	
 create-realms: authenticate
-	$(KCADM) create realms -s realm=ALMA       -s enabled=true
-	$(KCADM) create realms -s realm=ALMA-ADAPT -s enabled=true
+	$(KCADM) create realms -s realm=web   -s enabled=true
+	$(KCADM) create realms -s realm=adapt -s enabled=true
 	
-update-realms: create-realms
-	cp -p ./ALMA-realm.json ./ALMA-ADAPT-realm.json ./master-realm.json $(LOCAL_SHARED_DIR)
-	$(KCADM) update realms/master 	  -f $(CONTAINER_SHARED_DIR)/master-realm.json
-	$(KCADM) update realms/ALMA 	  -f $(CONTAINER_SHARED_DIR)/ALMA-realm.json
-	$(KCADM) update realms/ALMA-ADAPT -f $(CONTAINER_SHARED_DIR)/ALMA-ADAPT-realm.json
+update-realms: authenticate
+	cp -p ./web-realm.json ./adapt-realm.json ./master-realm.json $(LOCAL_SHARED_DIR)
+	$(KCADM) update realms/master -f $(CONTAINER_SHARED_DIR)/master-realm.json
+	$(KCADM) update realms/web	  -f $(CONTAINER_SHARED_DIR)/web-realm.json
+	$(KCADM) update realms/adapt  -f $(CONTAINER_SHARED_DIR)/adapt-realm.json
 
-DUMPFILE = ./$(REALM)-realm.json.DUMP
-dump-realm:
+# Update the default realm definitions with the current contents of the Keycloak DB
+# Use as: make dump-realm REALM=<realm>
+DUMPFILE = ./$(REALM)-realm.json
+dump-realm: authenticate
 	$(KCADM) get realms/$(REALM) > $(DUMPFILE)
 
 wait:
 	sleep 30
 
-# An alternative way to configure a running image
-alt-configure: stop start wait authenticate create-realms update-realms
+# Configure a running image with the default contents
+configure: stop start wait authenticate create-realms update-realms
 
-# 
