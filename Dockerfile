@@ -13,3 +13,18 @@ COPY ./keycloak-alma-theme-11.0.2.jar            /opt/jboss/keycloak/standalone/
 
 # Add ALMA/Oracle user storage provider module
 COPY ./keycloak-user-storage-provider-11.0.2.ear /opt/jboss/keycloak/standalone/deployments/
+
+# Oracle environment variables, with default values (ARG): pass actual values on the
+# command line with the --build-arg option of docker build
+
+ARG hostname=ora12c2.hq.eso.org
+ARG username=alma_amchavan
+ARG password='alma_amchavan$$dba'
+ARG database=ALMA
+
+ENV DB_VENDOR=oracle
+ENV DB_PORT=1521
+ENV DB_ADDR=$hostname
+ENV DB_USER=$username
+ENV DB_PASSWORD=$password
+ENV DB_DATABASE=$database

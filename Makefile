@@ -54,8 +54,12 @@ add-modules:
 		  .
 
 build:
-	docker build -t $(ALMAKC) .
-
+	docker build \
+		--build-arg hostname=ora12c2.hq.eso.org \
+		--build-arg username=alma_amchavan \
+		--build-arg password='alma_amchavan$$dba' \
+		--build-arg database=ALMA \
+		-t $(ALMAKC) .
 
 # KEEP THIS
 #	-v $(LOCAL_DATA_DIR):/opt/jboss/keycloak/standalone/data 
@@ -64,18 +68,8 @@ start: $(LOCAL_SHARED_DIR) $(LOCAL_DATA_DIR)
 	docker run --detach \
 		-p $(PORT):8080 \
 		-v $(LOCAL_SHARED_DIR):$(CONTAINER_SHARED_DIR) \
-		-e DB_VENDOR=oracle \
-		-e DB_ADDR=ora12c2.hq.eso.org \
-		-e DB_PORT=1521 \
-		-e DB_USER=alma_amchavan \
-		-e DB_PASSWORD='alma_amchavan$$dba' \
-		-e DB_DATABASE=ALMA \
 		--cidfile="$(CIDFILE)" \
 		$(ALMAKC)
-
-#
-
-
 
 stop:
 	- docker stop `cat $(CIDFILE)` 2> /dev/null
