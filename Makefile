@@ -65,6 +65,12 @@ start: $(LOCAL_SHARED_DIR) $(LOCAL_DATA_DIR)
 		-p $(PORT):8080 \
 		-v $(LOCAL_SHARED_DIR):$(CONTAINER_SHARED_DIR) \
 		--cidfile="$(CIDFILE)" \
+		-e DB_VENDOR=oracle \
+		-e DB_ADDR=ora12c2.hq.eso.org \
+		-e DB_PORT=1521 \
+		-e DB_USER=alma_amchavan \
+		-e DB_PASSWORD='alma_amchavan$$dba' \
+		-e DB_DATABASE=ALMA \
 		$(ALMAKC)
 
 stop:
