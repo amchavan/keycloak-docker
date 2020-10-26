@@ -18,12 +18,13 @@ COPY ./keycloak-user-storage-provider-11.0.2.ear /opt/jboss/keycloak/standalone/
 # command line with the --build-arg option of docker build
 
 ARG hostname=ora12c2.hq.eso.org
-ARG username=alma_amchavan
-ARG password='alma_amchavan$$dba'
+ARG username=
+ARG password=
 ARG database=ALMA
+ARG port_num=1521
 
 ENV DB_VENDOR=oracle
-ENV DB_PORT=1521
+ENV DB_PORT=$port_num
 ENV DB_ADDR=$hostname
 ENV DB_USER=$username
 ENV DB_PASSWORD=$password

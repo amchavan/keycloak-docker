@@ -1,6 +1,8 @@
 # amchavan, 23-Oct-2020
 # --------------------------------------------------------
 
+SHELL := /bin/bash
+
 # The name of our ALMA/Keycloak container
 ALMAKC = alma-keycloak
 
@@ -42,9 +44,17 @@ PORT = 8080
 # For pushing images to Docker Hub
 DOCKERHUB_USERNAME=amchavan
 
+# Trick!
+# We need to extract Oracle connection information from the standard
+# ALMA Archive configuration properties file and pass them to 'docker build':
+# We use a bash script to parse that file and write a set of Make assignement
+# statements in a temp file, which we then include here
+TEMP_INCLUDE_FILE=/tmp/parse-archive-config.env
+IGNORE := $(shell bash -c "./parse-archive-config.sh > $(TEMP_INCLUDE_FILE)")                         
+include $(TEMP_INCLUDE_FILE)
 
 clean: stop
-	rm -f ./keycloak-alma-theme*.jar ./keycloak-user-storage-provider*.ear 
+	rm -f ./keycloak-alma-theme*.jar ./keycloak-user-storage-provider*.ear $(TEMP_ENV_FILE)
 
 all: add-modules build
 
@@ -53,12 +63,14 @@ add-modules:
 	      $(M2)/repository/alma/obops/keycloak/keycloak-user-storage-provider/11.0.2/keycloak-user-storage-provider-11.0.2.ear \
 		  .
 
+# Build the container
 build:
 	docker build \
-		--build-arg hostname=ora12c2.hq.eso.org \
-		--build-arg username=alma_amchavan \
-		--build-arg password='alma_amchavan$$dba' \
-		--build-arg database=ALMA \
+		--build-arg hostname=$(HOSTNAME) \
+		--build-arg port_num=$(PORT_NUM) \
+		--build-arg username=$(USERNAME) \
+		--build-arg password='$(PASSWORD)' \
+		--build-arg database=$(DATABASE) \
 		-t $(ALMAKC) .
 
 # KEEP THIS
@@ -122,3 +134,5 @@ wait:
 # Configure a running image with the default contents
 configure: stop start wait authenticate create-realms update-realms
 
+test:
+	echo $(PORT_NUM) $(HOSTNAME) $(DATABASE) $(USERNAME) '$(PASSWORD)' $(DATABASE)
