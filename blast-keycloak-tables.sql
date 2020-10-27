@@ -1,8 +1,10 @@
 /*
  * This script wipes out all Keycloak database tables -- use with care.
+ * Depending on (as of yet) unknown factors, some of the following tables may not exist (yet).
+
  * amchavan, 27-Oct-2020
  */
- 
+
 drop table web_origins;
 drop table username_login_failure;
 drop table user_session_note;
