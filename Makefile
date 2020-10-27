@@ -56,11 +56,12 @@ include $(TEMP_INCLUDE_FILE)
 clean: stop
 	rm -f ./keycloak-alma-theme*.jar ./keycloak-user-storage-provider*.ear $(TEMP_ENV_FILE)
 
-all: add-modules build
+all: add-external-files build
 
-add-modules:
+add-external-files:
 	cp -p $(M2)/repository/alma/obops/keycloak/keycloak-alma-theme/11.0.2/keycloak-alma-theme-11.0.2.jar \
 	      $(M2)/repository/alma/obops/keycloak/keycloak-user-storage-provider/11.0.2/keycloak-user-storage-provider-11.0.2.ear \
+		  $(ACSDATA)/config/archiveConfig.properties \
 		  .
 
 # Build the container
@@ -87,6 +88,13 @@ stop:
 	- docker stop `cat $(CIDFILE)` 2> /dev/null
 	rm -f $(CIDFILE)
 
+# Show container logs on the console
+logs:
+	docker logs `cat $(CIDFILE)` -f
+
+# Open a bash session in the container
+bash:
+	docker exec -u 0 -it `cat $(CIDFILE)` bash
 
 # -------------------------------------------------------------------------
 # Docker stuff follows
