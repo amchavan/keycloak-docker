@@ -6,7 +6,7 @@ SHELL := /bin/bash
 # The name of our ALMA/Keycloak container
 ALMAKC = alma-keycloak
 
-# Execution path to the kcadm.sh script from outside the container
+# Execution path to the kcadm.sh script, from outside the container
 KCADM = docker exec -u 0 -it `cat $(CIDFILE)` /opt/jboss/keycloak/bin/kcadm.sh
 
 # Admin user credentials -- for installation only
@@ -49,7 +49,7 @@ DOCKERHUB_USERNAME=amchavan
 # ALMA Archive configuration properties file and pass them to 'docker build':
 # We use a bash script to parse that file and write a set of Make assignement
 # statements in a temp file, which we then include here
-TEMP_INCLUDE_FILE=/tmp/parse-archive-config.env
+TEMP_INCLUDE_FILE=./parse-archive-config.mk
 IGNORE := $(shell bash -c "./parse-archive-config.sh > $(TEMP_INCLUDE_FILE)")                         
 include $(TEMP_INCLUDE_FILE)
 
