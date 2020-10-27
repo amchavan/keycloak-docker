@@ -110,7 +110,7 @@ push:
 	docker push $(DOCKERHUB_USERNAME)/$(ALMAKC):$(NEWTAG)
 
 # -------------------------------------------------------------------------
-# Initialize Keycloak database
+# Migrate the Keycloak database
 # -------------------------------------------------------------------------
 
 authenticate:
@@ -132,9 +132,14 @@ update-realms: authenticate
 
 # Update the default realm definitions with the current contents of the Keycloak DB
 # Use as: make dump-realm REALM=<realm>
-DUMPFILE = ./$(REALM)-realm.json
+DUMPFILE := ./$(REALM)-realm.json
 dump-realm: authenticate
 	$(KCADM) get realms/$(REALM) > $(DUMPFILE)
+
+dump-realms:
+	make dump-realm REALM=master
+	make dump-realm REALM=adapt
+	make dump-realm REALM=web
 
 wait:
 	sleep 30
