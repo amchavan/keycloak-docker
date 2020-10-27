@@ -1,5 +1,5 @@
 {
-  "id" : "adapt",
+  "id" : "504d3318-375c-4f76-88ae-af16a23e4fc3",
   "realm" : "adapt",
   "displayName" : "adapt",
   "displayNameHtml" : "<em>ALMA ADAPT Keycloak Realm</em>",
@@ -72,7 +72,6 @@
   "webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister" : false,
   "webAuthnPolicyPasswordlessAcceptableAaguids" : [ ],
   "browserSecurityHeaders" : {
-    "contentSecurityPolicyReportOnly" : "",
     "xContentTypeOptions" : "nosniff",
     "xRobotsTag" : "none",
     "xFrameOptions" : "SAMEORIGIN",
@@ -81,13 +80,15 @@
     "strictTransportSecurity" : "max-age=31536000; includeSubDomains"
   },
   "smtpServer" : { },
+  "loginTheme" : "alma",
   "eventsEnabled" : false,
   "eventsListeners" : [ "jboss-logging" ],
   "enabledEventTypes" : [ ],
   "adminEventsEnabled" : false,
   "adminEventsDetailsEnabled" : false,
   "internationalizationEnabled" : false,
-  "supportedLocales" : [ ],
+  "supportedLocales" : [ "en" ],
+  "defaultLocale" : "en",
   "browserFlow" : "browser",
   "registrationFlow" : "registration",
   "directGrantFlow" : "direct grant",
