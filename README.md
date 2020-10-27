@@ -59,9 +59,14 @@ Copy the dump JSON file where you created the destination server with
 `make clean all` and make sure the `archive.keycloak.xyz` properties in
 _$ACSDATA/config/_archiveConfig.properties_ point to the new server.
 Assuming you haven't run this migration procedure before, you can simply start
-the server and import all realm data into it: realms,
-themes and user providers:
+the server and import all realm data into it:
 ```
 make start
 make configure
 ```
+
+### Caveats
+
+The following entities cannot be migrated automatically and must be re-instated manually:
+* User providers (see User Federation)
+* ???
