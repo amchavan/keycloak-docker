@@ -6,13 +6,16 @@ ADD  --chown=jboss:root \
      /opt/jboss/keycloak/modules/system/layers/base/com/oracle/jdbc/main/driver/ojdbc.jar
 
 # Create default admin/admin user
-COPY ./keycloak-add-default-admin-user.json      /opt/jboss/keycloak/standalone/configuration/keycloak-add-user.json
+COPY ./keycloak-add-default-admin-user.json /opt/jboss/keycloak/standalone/configuration/keycloak-add-user.json
 
 # Add ALMA UI theme
-COPY ./keycloak-alma-theme-11.0.2.jar            /opt/jboss/keycloak/standalone/deployments/
+COPY ./keycloak-alma-theme-11.0.2.jar  /opt/jboss/keycloak/standalone/deployments/
 
 # Add ALMA/Oracle user storage provider module
 COPY ./keycloak-user-storage-provider-11.0.2.ear /opt/jboss/keycloak/standalone/deployments/
+
+# Add archiveConfig.properties
+COPY ./archiveConfig.properties /opt/jboss/keycloak/standalone/config/
 
 # Oracle environment variables, with default values (ARG): pass actual values on the
 # command line with the --build-arg option of docker build
@@ -29,3 +32,6 @@ ENV DB_ADDR=$hostname
 ENV DB_USER=$username
 ENV DB_PASSWORD=$password
 ENV DB_DATABASE=$database
+
+# ACSDATA definition
+ENV ACSDATA=/opt/jboss/keycloak/standalone
