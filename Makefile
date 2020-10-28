@@ -7,7 +7,7 @@ SHELL := /bin/bash
 ALMAKC = alma-keycloak
 
 # Execution path to the kcadm.sh script, from outside the container
-KCADM = docker exec -u 0 -it `cat $(CIDFILE)` /opt/jboss/keycloak/bin/kcadm.sh
+KCADM = sudo docker exec -u 0 -it `cat $(CIDFILE)` /opt/jboss/keycloak/bin/kcadm.sh
 
 # Admin user credentials -- for installation only
 # Values should match the contents of keycloak-add-default-admin-user.json
@@ -71,7 +71,7 @@ add-external-files:
 
 # Build the container
 build:
-	docker build \
+	sudo docker build \
 		--build-arg hostname=$(HOSTNAME) \
 		--build-arg port_num=$(PORT_NUM) \
 		--build-arg username=$(USERNAME) \
@@ -83,23 +83,23 @@ build:
 #	-v $(LOCAL_DATA_DIR):/opt/jboss/keycloak/standalone/data 
 
 start: $(LOCAL_SHARED_DIR) $(LOCAL_DATA_DIR)
-	docker run --detach \
+	sudo docker run --detach \
 		-p $(PORT):8080 \
 		-v $(LOCAL_SHARED_DIR):$(CONTAINER_SHARED_DIR) \
 		--cidfile="$(CIDFILE)" \
 		$(ALMAKC)
 
 stop:
-	- docker stop `cat $(CIDFILE)` 2> /dev/null
+	- sudo docker stop `cat $(CIDFILE)` 2> /dev/null
 	rm -f $(CIDFILE)
 
 # Show container logs on the console
 logs:
-	docker logs `cat $(CIDFILE)` -f
+	sudo docker logs `cat $(CIDFILE)` -f
 
 # Open a bash session in the container
 bash:
-	docker exec -u 0 -it `cat $(CIDFILE)` bash
+	sudo docker exec -u 0 -it `cat $(CIDFILE)` bash
 
 # Save a running container as an image to a disk file. The image will be called $(ALMAKC)
 # and will be tagged as 'latest', as well as with the current datetime; for instance, 
@@ -108,9 +108,9 @@ bash:
 # The risulting file will be in tar+gzip format and include the 'latest' tag.
 DATETIME_TAG := $(shell date -u +%FT%T | tr : -)
 image:
-	docker commit --author $$USER `cat $(CIDFILE)` $(ALMAKC):latest | cut -d: -f2 > $(IIDFILE)
-	docker tag `cat $(IIDFILE)` $(ALMAKC):$(DATETIME_TAG)
-	docker save $(ALMAKC):latest $(ALMAKC):$(DATETIME_TAG) | gzip > $(ALMAKC)-$(DATETIME_TAG).tar.gz
+	sudo docker commit --author $$USER `cat $(CIDFILE)` $(ALMAKC):latest | cut -d: -f2 > $(IIDFILE)
+	sudo docker tag `cat $(IIDFILE)` $(ALMAKC):$(DATETIME_TAG)
+	sudo docker save $(ALMAKC):latest $(ALMAKC):$(DATETIME_TAG) | gzip > $(ALMAKC)-$(DATETIME_TAG).tar.gz
 
 # -------------------------------------------------------------------------
 # Migrate the Keycloak database
@@ -122,11 +122,11 @@ authenticate:
 		--realm    master \
 		--user     $(ADMIN_USERNAME) \
 		--password $(ADMIN_PASSWORD)
-	
+
 create-realms: authenticate
 	$(KCADM) create realms -s realm=web   -s enabled=true
 	$(KCADM) create realms -s realm=adapt -s enabled=true
-	
+
 update-realms: authenticate
 	cp -p ./web-realm.json ./adapt-realm.json ./master-realm.json $(LOCAL_SHARED_DIR)
 	$(KCADM) update realms/master -f $(CONTAINER_SHARED_DIR)/master-realm.json
