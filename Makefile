@@ -33,10 +33,10 @@ CONTAINER_SHARED_DIR = /shared
 REALM = ALMA
 
 # Where Docker writes the Container ID upon startup
-CIDFILE = $(ALMAKC).cid
+CIDFILE = $(LOCAL_SHARED_DIR)/$(ALMAKC).cid
 
 # Where Docker writes the image ID upon commit
-IIDFILE = $(ALMAKC).iid
+IIDFILE = $(LOCAL_SHARED_DIR)/$(ALMAKC).iid
 
 # Local Maven repository
 M2 = $(HOME)/.m2
@@ -86,7 +86,7 @@ start: $(LOCAL_SHARED_DIR)
 	sudo docker run --detach \
 		-p $(PORT):8080 \
 		-v $(LOCAL_SHARED_DIR):$(CONTAINER_SHARED_DIR) \
-		--cidfile="$(CONTAINER_SHARED_DIR)/$(CIDFILE)" \
+		--cidfile="$(CIDFILE)" \
 		$(ALMAKC)
 
 stop:
