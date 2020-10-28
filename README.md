@@ -41,9 +41,6 @@ any intermediate files, then rebuild the container.
 
 ### Special cases
 
-* **TBD** `make push OLDTAG=... NEWTAG=...` will push the image to DockerHub with a new tag;
-see _DOCKERHUB\_USERNAME_ below for more info.
-
 * `make bash` will open a bash session as user _root_ inside a container launched with `make start`
 
 * `make logs` will stream to the console the logs produced by a container launched with `make start`
