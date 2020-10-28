@@ -23,7 +23,7 @@ even though no connection actually takes place during the container build phase.
   `archive.keycloak.connection`,  `archive.keycloak.user` and 
   `archive.keycloak.passwd`. The database does not contain much data but it
   includes 90+ tables, and it's highly recommended to make it a dedicated
-  database.
+  database. (See (here)[https://htmlpreview.github.io/?https://gist.githubusercontent.com/thomasdarimont/b1c19da5e8df747b8596e6ddcda7e36f/raw/29309467f4ea07519cf614fd74943272e7d939f4/keycloak_db_overview_4.0.0.CR1-SNAPSHOT.svg] for a UML schema of that database).
 
 * ALMA account data is read using the conventional  `archive.relational...` 
   properties.
