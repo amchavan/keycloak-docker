@@ -33,7 +33,10 @@ CONTAINER_SHARED_DIR = /shared
 REALM = ALMA
 
 # Where Docker writes the Container ID upon startup
-CIDFILE = /tmp/$(ALMAKC).cid
+CIDFILE = $(ALMAKC).cid
+
+# Where Docker writes the image ID upon commit
+IIDFILE = $(ALMAKC).iid
 
 # Local Maven repository
 M2 = $(HOME)/.m2
@@ -54,7 +57,8 @@ IGNORE := $(shell bash -c "./parse-archive-config.sh > $(TEMP_INCLUDE_FILE)")
 include $(TEMP_INCLUDE_FILE)
 
 clean: stop
-	rm -f ./keycloak-alma-theme*.jar ./keycloak-user-storage-provider*.ear $(TEMP_ENV_FILE)
+	rm -f ./keycloak-alma-theme*.jar ./keycloak-user-storage-provider*.ear \
+		$(TEMP_ENV_FILE) $(ALMAKC)-*.tar.gz
 
 all: add-external-files build
 
@@ -96,18 +100,16 @@ logs:
 bash:
 	docker exec -u 0 -it `cat $(CIDFILE)` bash
 
-# -------------------------------------------------------------------------
-# Docker stuff follows
-# -------------------------------------------------------------------------
-
-# Tag an image and push it to Docker hub
-# Use as:
-#    echo <dockerhub-password> | make push OLDTAG=1.0 NEWTAG=1.1
-TAG = 0.1
-push:
-	docker login --username $(DOCKERHUB_USERNAME) --password-stdin
-	docker tag $(DOCKERHUB_USERNAME)/$(ALMAKC):$(OLDTAG) $(DOCKERHUB_USERNAME)/$(ALMAKC):$(NEWTAG)
-	docker push $(DOCKERHUB_USERNAME)/$(ALMAKC):$(NEWTAG)
+# Save a running container as an image to a disk file. The image will be called $(ALMAKC)
+# and will be tagged as 'latest', as well as with the current datetime; for instance, 
+# alma-keycloak:2020-10-28T09-31-51
+# It will be tagged as 'latest' as well.
+# The risulting file will be in tar+gzip format and include the 'latest' tag.
+DATETIME_TAG := $(shell date -u +%FT%T | tr : -)
+image:
+	docker commit --author $$USER `cat $(CIDFILE)` $(ALMAKC):latest | cut -d: -f2 > $(IIDFILE)
+	docker tag `cat $(IIDFILE)` $(ALMAKC):$(DATETIME_TAG)
+	docker save $(ALMAKC):latest $(ALMAKC):$(DATETIME_TAG) | gzip > $(ALMAKC)-$(DATETIME_TAG).tar.gz
 
 # -------------------------------------------------------------------------
 # Migrate the Keycloak database

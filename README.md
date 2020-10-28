@@ -47,6 +47,16 @@ see _DOCKERHUB\_USERNAME_ below for more info.
 * `make bash` will open a bash session as user _root_ inside a container launched with `make start`
 
 * `make logs` will stream to the console the logs produced by a container launched with `make start`
+  
+* `make image` will create a Docker image called _alma-keycloak_ from a running container 
+  and save it to the local directory
+  as a tar+gz file. The image will be tagged as _latest_ as well as with a timestamp, for instance
+  _2020-10-28T10-18-47_. The file, called _alma-keycloak-&lt;timestamp&gt;.tar.gz_ can be copied
+  elsewhere, the image can imported into Docker and run as a container. For instance:
+  ```
+  sudo docker load -i alma-keycloak-2020-10-28T10-18-47.tar.gz
+  sudo docker run -d alma-keycloak
+  ```
 
 ### Customization
 

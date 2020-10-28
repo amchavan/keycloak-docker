@@ -2,3 +2,6 @@ keycloak-alma-theme-*.jar
 keycloak-user-storage-provider-*.ear
 parse-archive-config.mk
 archiveConfig.properties
+alma-keycloak-*.tar.gz
+alma-keycloak.?id
+
