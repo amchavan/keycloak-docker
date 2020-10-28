@@ -58,7 +58,8 @@ include $(TEMP_INCLUDE_FILE)
 
 clean: stop
 	rm -f ./keycloak-alma-theme*.jar ./keycloak-user-storage-provider*.ear \
-		$(TEMP_ENV_FILE) $(ALMAKC)-*.tar.gz
+		$(TEMP_INCLUDE_FILE) $(ALMAKC)-*.tar.gz $(CIDFILE) $(IIDFILE) \
+		archiveConfig.properties
 
 all: add-external-files build
 
