@@ -86,7 +86,7 @@ start: $(LOCAL_SHARED_DIR)
 	sudo docker run --detach \
 		-p $(PORT):8080 \
 		-v $(LOCAL_SHARED_DIR):$(CONTAINER_SHARED_DIR) \
-		--cidfile="$(CIDFILE)" \
+		--cidfile="$(CONTAINER_SHARED_DIR)/$(CIDFILE)" \
 		$(ALMAKC)
 
 stop:
