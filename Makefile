@@ -107,10 +107,11 @@ bash:
 # It will be tagged as 'latest' as well.
 # The risulting file will be in tar+gzip format and include the 'latest' tag.
 DATETIME_TAG := $(shell date -u +%FT%T | tr : -)
+HOST := $(shell hostname)
 image:
 	sudo docker commit --author $$USER `cat $(CIDFILE)` $(ALMAKC):latest | cut -d: -f2 > $(IIDFILE)
 	sudo docker tag `cat $(IIDFILE)` $(ALMAKC):$(DATETIME_TAG)
-	sudo docker save $(ALMAKC):latest $(ALMAKC):$(DATETIME_TAG) | gzip > $(ALMAKC)-$(DATETIME_TAG).tar.gz
+	sudo docker save $(ALMAKC):latest $(ALMAKC):$(DATETIME_TAG) | gzip > $(ALMAKC)-$(HOST)-$(DATETIME_TAG).tar.gz
 
 # -------------------------------------------------------------------------
 # Migrate the Keycloak database
