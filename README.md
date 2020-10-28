@@ -48,7 +48,7 @@ any intermediate files, then rebuild the container.
 * `make image` will create a Docker image called _alma-keycloak_ from a running container 
   and save it to the local directory
   as a tar+gz file. The image will be tagged as _latest_ as well as with a timestamp, for instance
-  _2020-10-28T10-18-47_. The file, called _alma-keycloak-&lt;hostname$gt;-&lt;timestamp&gt;.tar.gz_ can be copied
+  _2020-10-28T10-18-47_. The file, called _alma-keycloak-&lt;hostname&gt;-&lt;timestamp&gt;.tar.gz_ can be copied
   elsewhere, the image can imported into Docker and run as a container. For instance:
   ```
   sudo docker load -i alma-keycloak-ma024088.ads.eso.org-2020-10-28T10-18-47.tar.gz
