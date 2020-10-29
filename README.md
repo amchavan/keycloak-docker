@@ -52,7 +52,7 @@ any intermediate files, then rebuild the container.
   elsewhere, the image can imported into Docker and run as a container. For instance:
   ```
   sudo docker load -i alma-keycloak-ma024088.ads.eso.org-2020-10-28T10-18-47.tar.gz
-  sudo docker run -d alma-keycloak
+  sudo docker run -d -p 8080:8080 alma-keycloak
   ```
   **IMPORTANT** Images can only be saved form a running container: make sure Keycloak fully completes
   its startup process before you attempt saving the image. If not, your image may not work properly.
