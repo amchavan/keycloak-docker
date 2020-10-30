@@ -86,28 +86,19 @@ Keycloak's configuration is stored in an Oracle database, as explained above.
 You can export that configuration from a server and import it into a different one.
 
 Launch the fully configured Keycloak server and dump its configuration 
-information to a set of JSON files:
+information to a JSON file called _keycloak-db-dump.json_:
 ```
-make start
-make dump-realms
+make database-export
 ```
-This will produce two JSON files in the current directory, _master-realm.json_ and _ALMA-realm.json_. The new version of those files **should always be committed to Git**.
+The new version of the dump file **should always be committed to Git**.
 
-Move the dump JSON files where you created the destination Keycloak server
-(after making sure the `archive.keycloak` properties in
-_$ACSDATA/config/_archiveConfig.properties_ point to the second Oracle server).
-Assuming you haven't run this migration procedure before, you can simply start
+After making sure the `archive.keycloak` properties in
+_$ACSDATA/config/_archiveConfig.properties_ point to the second Oracle server 
+you can simply start
 the server and import all realm data into it:
 ```
-make start
-make configure
+make database-import
 ```
-**NOTE** The following entities cannot be migrated automatically and must be re-instated manually:
-* User providers (see User Federation)
-  * Add _alma-user-provider_ to the list and make sure to set its _Cache Policy_ to 
-    _NO_CACHE_ in _Cache Settings_
-
-* **TBD**
 
 ### Undoing a migration
 

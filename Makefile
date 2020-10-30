@@ -159,13 +159,13 @@ database-export-internal:
 		> $(CIDFILE)
 
 database-export: stop database-export-internal 
-	sleep 120
+	sleep 60
 	make stop
 
 database-import-internal:
 	sudo docker run --detach \
 		-v $(PWD):$(CONTAINER_SHARED_DIR) \
-		$(ALMAKC)-import-export \
+		$(ALMAKC) \
 		-Dkeycloak.migration.action=import \
 		-Dkeycloak.migration.provider=singleFile \
 		-Dkeycloak.migration.file=$(CONTAINER_SHARED_DIR)/keycloak-db-dump.json \
@@ -173,5 +173,5 @@ database-import-internal:
 		> $(CIDFILE)
 
 database-import: stop database-import-internal 
-	sleep 120
+	sleep 60
 	make stop
