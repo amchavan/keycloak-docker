@@ -34,28 +34,36 @@ See below for migrating Keycloak's config data from an Oracle server to another 
 
 ### Basic usage
 
-`make clean all` will stop and delete the current container, remove
-any intermediate files, then rebuild the container.
+* `make clean all` will stop and delete the current container, remove 
+  any intermediate files, then rebuild the container
 
-`make start` and `make stop` can be used to start and stop the container.
+* `make start` and `make stop` can be used to start and stop the container
+  
+* `make restart` stops the currently running container (if any) and starts a new one
+
+* `make logs` will stream to the console the logs produced by a container launched with `make start`
+
+Typical usage is `make restart logs`.
 
 ### Special cases
 
 * `make bash` will open a bash session as user _root_ inside a container launched with `make start`
 
-* `make logs` will stream to the console the logs produced by a container launched with `make start`
-  
 * `make image` will create a Docker image called _alma-keycloak_ from a running container 
-  and save it to the local directory
+  and save it to the current directory
   as a tar+gz file. The image will be tagged as _latest_ as well as with a timestamp, for instance
   _2020-10-28T10-18-47_. The file, called _alma-keycloak-&lt;hostname&gt;-&lt;timestamp&gt;.tar.gz_ can be copied
-  elsewhere, the image can imported into Docker and run as a container. For instance:
+  elsewhere and the image can imported into Docker and run as a container. For instance:
   ```
   sudo docker load -i alma-keycloak-ma024088.ads.eso.org-2020-10-28T10-18-47.tar.gz
   sudo docker run -d -p 8080:8080 alma-keycloak
   ```
   **IMPORTANT** Images can only be saved form a running container: make sure Keycloak fully completes
   its startup process before you attempt saving the image. If not, your image may not work properly.
+
+* `make configure` resterts the current container, then creates and populates the ALMA realm.  
+  **NOTE** This can be performed only once because it expects an empty configuration database. If needed,
+  the database can be emptied, see _Undoing a migration_ below.
 
 ### Customization
 
@@ -83,7 +91,7 @@ information to a set of JSON files:
 make start
 make dump-realms
 ```
-This will produce three JSON files in the current directory, _adapt-realm.json_, _master-realm.json_ and _web-realm.json_. The most recent version of those files **should always be committed to Git** in this module.
+This will produce two JSON files in the current directory, _master-realm.json_ and _ALMA-realm.json_. The new version of those files **should always be committed to Git**.
 
 Move the dump JSON files where you created the destination Keycloak server
 (after making sure the `archive.keycloak` properties in

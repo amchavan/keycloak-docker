@@ -79,6 +79,8 @@ build:
 		--build-arg database=$(DATABASE) \
 		-t $(ALMAKC) .
 
+restart: stop start
+
 # KEEP THIS
 #	-v $(LOCAL_DATA_DIR):/opt/jboss/keycloak/standalone/data 
 
@@ -125,14 +127,12 @@ authenticate:
 		--password $(ADMIN_PASSWORD)
 
 create-realms: authenticate
-	$(KCADM) create realms -s realm=web   -s enabled=true
-	$(KCADM) create realms -s realm=adapt -s enabled=true
+	$(KCADM) create realms -s realm=ALMA -s enabled=true
 
 update-realms: authenticate
 	cp -p ./web-realm.json ./adapt-realm.json ./master-realm.json $(LOCAL_SHARED_DIR)
 	$(KCADM) update realms/master -f $(CONTAINER_SHARED_DIR)/master-realm.json
-	$(KCADM) update realms/web	  -f $(CONTAINER_SHARED_DIR)/web-realm.json
-	$(KCADM) update realms/adapt  -f $(CONTAINER_SHARED_DIR)/adapt-realm.json
+	$(KCADM) update realms/ALMA   -f $(CONTAINER_SHARED_DIR)/ALMA-realm.json
 
 # Update the default realm definitions with the current contents of the Keycloak DB
 # Use as: make dump-realm REALM=<realm>
@@ -142,14 +142,13 @@ dump-realm: authenticate
 
 dump-realms:
 	make dump-realm REALM=master
-	make dump-realm REALM=adapt
-	make dump-realm REALM=web
+	make dump-realm REALM=ALMA
 
 wait:
 	sleep 30
 
 # Configure a running image with the default contents
-configure: stop start wait authenticate create-realms update-realms
+configure: restart wait authenticate create-realms update-realms
 
 test:
 	echo $(PORT_NUM) $(HOSTNAME) $(DATABASE) $(USERNAME) '$(PASSWORD)' $(DATABASE)
