@@ -1,3 +1,4 @@
+# --------------------------------------------------------
 # amchavan, 23-Oct-2020
 # --------------------------------------------------------
 
@@ -7,7 +8,7 @@ SHELL := /bin/bash
 ALMAKC = alma-keycloak
 
 # Execution path to the kcadm.sh script, from outside the container
-KCADM = sudo docker exec -u 0 -it `cat $(CIDFILE)` /opt/jboss/keycloak/bin/kcadm.sh
+KCADM = sudo docker exec -u 0 -it $$(cat $(CIDFILE)) /opt/jboss/keycloak/bin/kcadm.sh
 
 # Admin user credentials -- for installation only
 # Values should match the contents of keycloak-add-default-admin-user.json
@@ -69,7 +70,8 @@ add-external-files:
 		  $(ACSDATA)/config/archiveConfig.properties \
 		  .
 
-# Build the container
+# Build the containers: the regular one and the more limited one for importing and 
+# exporting of the database
 build:
 	sudo docker build \
 		--build-arg hostname=$(HOSTNAME) \
@@ -78,6 +80,13 @@ build:
 		--build-arg password='$(PASSWORD)' \
 		--build-arg database=$(DATABASE) \
 		-t $(ALMAKC) .
+	sudo docker build -f Dockerfile.import-export \
+		--build-arg hostname=$(HOSTNAME) \
+		--build-arg port_num=$(PORT_NUM) \
+		--build-arg username=$(USERNAME) \
+		--build-arg password='$(PASSWORD)' \
+		--build-arg database=$(DATABASE) \
+		-t $(ALMAKC)-import-export .
 
 restart: stop start
 
@@ -88,20 +97,23 @@ start: $(LOCAL_SHARED_DIR)
 	sudo docker run --detach \
 		-p $(PORT):8080 \
 		-v $(LOCAL_SHARED_DIR):$(CONTAINER_SHARED_DIR) \
-		--cidfile="$(CIDFILE)" \
-		$(ALMAKC)
+		$(ALMAKC) \
+		> $(CIDFILE)
 
-stop:
-	- sudo docker stop `cat $(CIDFILE)` 2> /dev/null
-	rm -f $(CIDFILE)
+stop: 
+	@if [ -e $(CIDFILE) ] ; then \
+		sudo docker stop $$(cat $(CIDFILE)) > /dev/null ; \
+		rm -f $(CIDFILE); \
+	fi
+	
 
 # Show container logs on the console
 logs:
-	sudo docker logs `cat $(CIDFILE)` -f
+	sudo docker logs $$(cat $(CIDFILE)) -f
 
 # Open a bash session in the container
 bash:
-	sudo docker exec -u 0 -it `cat $(CIDFILE)` bash
+	sudo docker exec -u 0 -it $$(cat $(CIDFILE)) bash
 
 # Save a running container as an image to a disk file. The image will be called $(ALMAKC)
 # and will be tagged as 'latest', as well as with the current datetime; for instance, 
@@ -111,7 +123,7 @@ bash:
 DATETIME_TAG := $(shell date -u +%FT%T | tr : -)
 HOST := $(shell hostname)
 image:
-	sudo docker commit --author $$USER `cat $(CIDFILE)` $(ALMAKC):latest | cut -d: -f2 > $(IIDFILE)
+	sudo docker commit --author $$USER $$(cat $(CIDFILE)) $(ALMAKC):latest | cut -d: -f2 > $(IIDFILE)
 	sudo docker tag `cat $(IIDFILE)` $(ALMAKC):$(DATETIME_TAG)
 	sudo docker save $(ALMAKC):latest $(ALMAKC):$(DATETIME_TAG) | gzip > $(ALMAKC)-$(HOST)-$(DATETIME_TAG).tar.gz
 
@@ -126,29 +138,40 @@ authenticate:
 		--user     $(ADMIN_USERNAME) \
 		--password $(ADMIN_PASSWORD)
 
-create-realms: authenticate
-	$(KCADM) create realms -s realm=ALMA -s enabled=true
+# # Update the default realm definitions with the current contents of the Keycloak DB
+# # Use as: make dump-realm REALM=<realm>
+# DUMPFILE := ./realm-$(REALM).json
+# dump-realm: authenticate
+# 	$(KCADM) get realms/$(REALM) > $(DUMPFILE)
 
-update-realms: authenticate
-	cp -p ./web-realm.json ./adapt-realm.json ./master-realm.json $(LOCAL_SHARED_DIR)
-	$(KCADM) update realms/master -f $(CONTAINER_SHARED_DIR)/master-realm.json
-	$(KCADM) update realms/ALMA   -f $(CONTAINER_SHARED_DIR)/ALMA-realm.json
+# dump-realms:
+# 	make dump-realm REALM=master
+# 	make dump-realm REALM=ALMA
 
-# Update the default realm definitions with the current contents of the Keycloak DB
-# Use as: make dump-realm REALM=<realm>
-DUMPFILE := ./$(REALM)-realm.json
-dump-realm: authenticate
-	$(KCADM) get realms/$(REALM) > $(DUMPFILE)
+database-export-internal:
+	sudo docker run --detach \
+		-v $(PWD):$(CONTAINER_SHARED_DIR) \
+		$(ALMAKC)-import-export \
+		-Dkeycloak.migration.action=export \
+		-Dkeycloak.migration.provider=singleFile \
+		-Dkeycloak.migration.file=$(CONTAINER_SHARED_DIR)/keycloak-db-dump.json \
+		-Dkeycloak.migration.usersExportStrategy=SKIP \
+		> $(CIDFILE)
 
-dump-realms:
-	make dump-realm REALM=master
-	make dump-realm REALM=ALMA
+database-export: stop database-export-internal 
+	sleep 120
+	make stop
 
-wait:
-	sleep 30
+database-import-internal:
+	sudo docker run --detach \
+		-v $(PWD):$(CONTAINER_SHARED_DIR) \
+		$(ALMAKC)-import-export \
+		-Dkeycloak.migration.action=import \
+		-Dkeycloak.migration.provider=singleFile \
+		-Dkeycloak.migration.file=$(CONTAINER_SHARED_DIR)/keycloak-db-dump.json \
+		-Dkeycloak.migration.strategy=OVERWRITE_EXISTING \
+		> $(CIDFILE)
 
-# Configure a running image with the default contents
-configure: restart wait authenticate create-realms update-realms
-
-test:
-	echo $(PORT_NUM) $(HOSTNAME) $(DATABASE) $(USERNAME) '$(PASSWORD)' $(DATABASE)
+database-import: stop database-import-internal 
+	sleep 120
+	make stop

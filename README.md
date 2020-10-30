@@ -102,13 +102,9 @@ the server and import all realm data into it:
 make start
 make configure
 ```
-See below for undoing a migration.
-
-### Caveats
-
-The following entities cannot be migrated automatically and must be re-instated manually:
+**NOTE** The following entities cannot be migrated automatically and must be re-instated manually:
 * User providers (see User Federation)
-  * set that to _alma-user-provider_ and make sure to set _Cache Policy_ to 
+  * Add _alma-user-provider_ to the list and make sure to set its _Cache Policy_ to 
     _NO_CACHE_ in _Cache Settings_
 
 * **TBD**

@@ -1,3 +1,8 @@
+# Main Dockerfile
+# Includes the alma theme and the user provider definitions, 
+#
+# amchavan, 30-Oct-2020
+
 FROM jboss/keycloak
 
 # Download and copy the Oracle JDBC driver, see https://hub.docker.com/r/jboss/keycloak
